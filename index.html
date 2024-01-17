@@ -1,55 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" href="./spinner.css" />
+    <link rel="stylesheet" href="./site.css" />
     <script src="https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <style>
-      .canvas-container {
-        position: relative;
-        display: flex;
-        width: 100%;
-        max-width: 480px;
-        padding: 0;
-        margin: 5em auto;
-        flex-direction: row;
-        column-gap: 1em;
-        align-items: center;
-      }
-      .preview {
-        border: 1px solid rgb(221, 56, 56);
-        width: 192px;
-        height: 144px;
-      }
-      .input-container {
-        position: relative;
-        border: 1px solid rgb(41, 60, 233);
-        width: 192px;
-        height: 192px;
-        cursor: pointer;
-      }
-      .input-container .help-text {
-        display: none;
-      }
-      .input-container:hover .uploaded {
-        opacity: 0.5;
-      }
-      .input-container:hover .help-text {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        vertical-align: middle;
-        background-color: rgba(0, 0, 0, .1);
-        justify-content: center;
-        align-items: center;
-      }
-      #faceContainer .uploaded {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-      }
-      #upload_file {
-        display: none;
-      }
-    </style>
+    <script src="./spinner.js"></script>
   </head>
   <body>
     <input
@@ -64,6 +19,7 @@
           <canvas class="uploaded"></canvas>
         </div>
         <div class="help-text">Click to upload</div>
+        <div id="spinner" class="spinner"></div>
       </div>
       <canvas class="preview" id="quiz" width="1920" height="1440"></canvas>
     </div>

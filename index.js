@@ -4,17 +4,29 @@ let currentImg;
 
 window.onload = async () => {
   console.log('window onload');
-  await loadModel();
+  const inputContainer = document.getElementById('inputContainer');
+  const spinner = document.getElementById('spinner');
   const fileElement = document.getElementById('upload_file');
+  let isModelLoaded = false;
+  addSpinner(spinner);
+  {
+    await loadModel();
+    console.log('model loaded');
+    spinner.style.display = 'none';
+    isModelLoaded = true;
+  }
   fileElement.addEventListener('change', (evt) => {
-    console.log(evt);
+    if (!isModelLoaded) {
+      window.alert('Model not loaded yet');
+      return;
+    }
     openImage(evt, async (dataURL) => {
       currentImg = await faceapi.fetchImage(dataURL);
       landmarks = await faceapi.detectFaceLandmarks(currentImg);
       redraw();
     });
   });
-  document.getElementById('inputContainer').addEventListener('click', (evt) => {
+  inputContainer.addEventListener('click', (evt) => {
     evt.preventDefault();
     fileElement.click();
   });
@@ -122,7 +134,6 @@ async function loadModel() {
   await faceapi.loadFaceLandmarkModel(
     'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/'
   );
-  console.log('model loaded');
 }
 
 function openImage(file, callback) {

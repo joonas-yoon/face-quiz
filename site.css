@@ -1,0 +1,57 @@
+.canvas-container {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 480px;
+  padding: 0;
+  margin: 5em auto;
+  flex-direction: row;
+  column-gap: 1em;
+  align-items: center;
+}
+.preview {
+  border: 1px solid rgb(221, 56, 56);
+  width: 192px;
+  height: 144px;
+}
+.input-container {
+  position: relative;
+  border: 1px solid rgb(41, 60, 233);
+  width: 192px;
+  height: 192px;
+  cursor: pointer;
+}
+.input-container .help-text {
+  display: none;
+}
+.input-container:hover .uploaded {
+  opacity: 0.5;
+}
+.input-container:hover .help-text {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  vertical-align: middle;
+  background-color: rgba(0, 0, 0, 0.1);
+  justify-content: center;
+  align-items: center;
+}
+#faceContainer .uploaded {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+#upload_file {
+  display: none;
+}
+.spinner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-items: center;
+  align-items: center;
+  background-color: #3f3f3f;
+}
