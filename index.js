@@ -2,13 +2,15 @@ let mainCanvas;
 let context;
 let currentImg;
 
-window.onload = () => {
+window.onload = async () => {
   console.log('window onload');
+  await loadModel();
   const fileElement = document.getElementById('upload_file');
   fileElement.addEventListener('change', (evt) => {
     console.log(evt);
     openImage(evt, async (dataURL) => {
       currentImg = await faceapi.fetchImage(dataURL);
+      landmarks = await faceapi.detectFaceLandmarks(currentImg);
       redraw();
     });
   });
@@ -114,6 +116,13 @@ function getBoundingBox(points) {
     width: right - left,
     height: bottom - top,
   };
+}
+
+async function loadModel() {
+  await faceapi.loadFaceLandmarkModel(
+    'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/'
+  );
+  console.log('model loaded');
 }
 
 function openImage(file, callback) {
