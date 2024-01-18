@@ -1,8 +1,7 @@
 .canvas-container {
   position: relative;
   display: flex;
-  width: 100%;
-  max-width: 480px;
+  width: fit-content;
   padding: 0;
   margin: 5em auto;
   flex-direction: row;
