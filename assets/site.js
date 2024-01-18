@@ -82,7 +82,7 @@ async function redraw() {
     context.beginPath();
     context.rect(left, top, oWidth, oHeight);
     context.strokeStyle = '#0000ff';
-    context.lineWidth = 2;
+    context.lineWidth = recalculateLineWidth(mainCanvas);
     context.stroke();
     context.closePath();
     context.lineWidth = oldWidth;
@@ -146,6 +146,14 @@ function clipAndCopyImage(inputCanvas, outputCanvas, points, dx, dy, dw, dh) {
       dh
     );
   };
+}
+
+function recalculateLineWidth(canvas) {
+  const {width, height} = canvas;
+  const size = Math.min(width, height);
+  if (size < 480) return 2;
+  if (size < 1024) return 3;
+  return Math.ceil(Math.log10(size) * 2);
 }
 
 function canvasToImage(canvas) {
