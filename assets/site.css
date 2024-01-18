@@ -60,3 +60,12 @@
   align-items: center;
   background-color: #3f3f3f;
 }
+@media screen and (max-width: 768px) {
+  .canvas-container {
+    flex-direction: column;
+    row-gap: 1em;
+  }
+  .output-container {
+    grid-template-columns: repeat(2, 192px);
+  }
+}
