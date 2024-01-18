@@ -21,9 +21,9 @@ window.onload = async () => {
       window.alert('Model not loaded yet');
       return;
     }
+
     const imgFile = evt.target.files[0];
     currentImg = await faceapi.bufferToImage(imgFile);
-    landmarks = await faceapi.detectFaceLandmarks(currentImg);
 
     const options = getFaceDetectorOptions();
     faces = await faceapi.detectAllFaces(currentImg, options);
@@ -61,83 +61,65 @@ async function redraw() {
   container.innerHTML = '';
   container.appendChild(mainCanvas);
 
+  const tempCanvas = document.createElement('canvas');
+  // document.body.appendChild(tempCanvas);
+
   for (const face of faces) {
     const cw = mainCanvas.width,
       ch = mainCanvas.height;
     const {x, y, width, height} = face.relativeBox;
+    const [left, top, oWidth, oHeight] = [
+      x * cw,
+      y * ch,
+      width * cw,
+      height * ch,
+    ];
     console.log(x, y, width, height);
     // draw box
     const oldWidth = context.lineWidth;
     context.beginPath();
-    context.rect(x * cw, y * ch, width * cw, height * ch);
+    context.rect(left, top, oWidth, oHeight);
     context.strokeStyle = '#0000ff';
     context.lineWidth = 2;
     context.stroke();
     context.closePath();
     context.lineWidth = oldWidth;
+
+    // clip image by box
+    const clippedImage = clipImage(
+      currentImg,
+      tempCanvas,
+      left,
+      top,
+      oWidth,
+      oHeight
+    );
+
+    // detect landmarks
+    const landmarks = await faceapi.detectFaceLandmarks(clippedImage);
+
+    // draw
+    // drawLandmarks(tempCanvas, landmarks);
+    createPuzzle(tempCanvas, landmarks);
   }
-
-  // console.log('currentImg', currentImg);
-
-  // drawPoints(
-  //   context,
-  //   [
-  //     ...landmarks.positions.slice(17, 22), // left eyebrow
-  //     ...landmarks.positions.slice(22, 27), // right eyebrow
-  //     ...landmarks.positions.slice(36, 42), // left eye
-  //     ...landmarks.positions.slice(42, 48), // right eye
-  //     ...landmarks.positions.slice(29, 36), // nose
-  //     ...landmarks.positions.slice(48, 68), // mouth
-  //   ],
-  //   '#0000ff88'
-  // );
-
-  // drawPoints(context, [...landmarks.positions.slice(17, 22)], '#0000ff88');
-  // drawPoints(context, [...landmarks.positions.slice(22, 27)], '#00ff0088');
-  // drawPoints(context, [...landmarks.positions.slice(36, 42)], '#ff000088');
-  // drawPoints(context, [...landmarks.positions.slice(42, 48)], '#00ffff88');
-  // drawPoints(context, [...landmarks.positions.slice(29, 36)], '#ff00ff88');
-  // drawPoints(context, [...landmarks.positions.slice(48, 68)], '#ffff0088');
-
-  // left eye
-  clipAndCopyImage(
-    [
-      // ...landmarks.positions.slice(17, 22), // eyebrow
-      ...landmarks.positions.slice(36, 42),
-    ],
-    0,
-    0,
-    640,
-    640
-  );
-  // right eye
-  clipAndCopyImage(
-    [
-      // ...landmarks.positions.slice(22, 27), // eyebrow
-      ...landmarks.positions.slice(42, 48),
-    ],
-    1280,
-    0,
-    640,
-    640
-  );
-  // nose
-  clipAndCopyImage(landmarks.positions.slice(29, 36), 640, 0, 640, 640);
-  // mouth
-  clipAndCopyImage(landmarks.positions.slice(48, 68), 0, 640, 1920, 800);
 }
 
-function clipImage(img, x, y, width, height) {
-
+function clipImage(image, outCanvas, x, y, width, height) {
+  outCanvas.width = width;
+  outCanvas.height = height;
+  const ctx = outCanvas.getContext('2d');
+  ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+  const img = new Image();
+  img.src = outCanvas.toDataURL();
+  return img;
 }
 
-function clipAndCopyImage(points, dx, dy, dw, dh) {
-  const outputCanvas = document.getElementById('quiz');
+function clipAndCopyImage(inputCanvas, outputCanvas, points, dx, dy, dw, dh) {
   const boundingBox = getBoundingBox(points);
   console.log('bb', boundingBox);
   const ctx = outputCanvas.getContext('2d');
   const image = new Image();
-  image.src = mainCanvas.toDataURL();
+  image.src = inputCanvas.toDataURL();
   const padding = 5;
   const bound = keepAspectBound(
     boundingBox.left - padding,
@@ -160,6 +142,72 @@ function clipAndCopyImage(points, dx, dy, dw, dh) {
       dh
     );
   };
+}
+
+function canvasToImage(canvas) {
+  const image = new Image();
+  image.src = canvas.toDataURL();
+  return image;
+}
+
+function createPuzzle(inputCanvas, landmarks) {
+  const outputCanvas = document.getElementById('quiz');
+  // left eye
+  clipAndCopyImage(
+    inputCanvas,
+    outputCanvas,
+    [
+      // ...landmarks.positions.slice(17, 22), // eyebrow
+      ...landmarks.positions.slice(36, 42),
+    ],
+    0,
+    0,
+    640,
+    640
+  );
+  // right eye
+  clipAndCopyImage(
+    inputCanvas,
+    outputCanvas,
+    [
+      // ...landmarks.positions.slice(22, 27), // eyebrow
+      ...landmarks.positions.slice(42, 48),
+    ],
+    1280,
+    0,
+    640,
+    640
+  );
+  // nose
+  clipAndCopyImage(
+    inputCanvas,
+    outputCanvas,
+    landmarks.positions.slice(29, 36),
+    640,
+    0,
+    640,
+    640
+  );
+  // mouth
+  clipAndCopyImage(
+    inputCanvas,
+    outputCanvas,
+    landmarks.positions.slice(48, 68),
+    0,
+    640,
+    1920,
+    800
+  );
+}
+
+function drawLandmarks(canvas, landmarks) {
+  const context = canvas.getContext('2d');
+  drawPoints(context, [...landmarks.positions.slice(17, 22)], '#0000ff88');
+  drawPoints(context, [...landmarks.positions.slice(22, 27)], '#00ff0088');
+  drawPoints(context, [...landmarks.positions.slice(36, 42)], '#ff000088');
+  drawPoints(context, [...landmarks.positions.slice(42, 48)], '#00ffff88');
+  drawPoints(context, [...landmarks.positions.slice(29, 36)], '#ff00ff88');
+  drawPoints(context, [...landmarks.positions.slice(48, 68)], '#ffff0088');
 }
 
 function keepAspectBound(sx, sy, sw, sh, dw, dh) {
