@@ -60,6 +60,8 @@ async function redraw() {
   console.log(mainCanvas);
   container.innerHTML = '';
   container.appendChild(mainCanvas);
+  const outputContainer = document.getElementById('outputContainer');
+  outputContainer.innerHTML = '';
 
   const tempCanvas = document.createElement('canvas');
   // document.body.appendChild(tempCanvas);
@@ -100,7 +102,9 @@ async function redraw() {
 
     // draw
     // drawLandmarks(tempCanvas, landmarks);
-    createPuzzle(tempCanvas, landmarks);
+    const outCanvas = createPuzzle(tempCanvas, landmarks);
+    outCanvas.className = 'output';
+    outputContainer.appendChild(outCanvas);
   }
 }
 
@@ -151,7 +155,9 @@ function canvasToImage(canvas) {
 }
 
 function createPuzzle(inputCanvas, landmarks) {
-  const outputCanvas = document.getElementById('quiz');
+  const outputCanvas = document.createElement('canvas');
+  outputCanvas.width = 1920;
+  outputCanvas.height = 1280;
   // left eye
   clipAndCopyImage(
     inputCanvas,
@@ -198,6 +204,7 @@ function createPuzzle(inputCanvas, landmarks) {
     1920,
     800
   );
+  return outputCanvas;
 }
 
 function drawLandmarks(canvas, landmarks) {
