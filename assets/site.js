@@ -64,7 +64,7 @@ async function redraw() {
   outputContainer.innerHTML = '';
 
   const tempCanvas = document.createElement('canvas');
-  // document.body.appendChild(tempCanvas);
+  document.body.appendChild(tempCanvas);
 
   for (const face of faces) {
     const cw = mainCanvas.width,
@@ -79,10 +79,11 @@ async function redraw() {
     console.log(x, y, width, height);
     // draw box
     const oldWidth = context.lineWidth;
+    const lineWidth = recalculateLineWidth(mainCanvas);
     context.beginPath();
     context.rect(left, top, oWidth, oHeight);
     context.strokeStyle = '#0000ff';
-    context.lineWidth = recalculateLineWidth(mainCanvas);
+    context.lineWidth = lineWidth;
     context.stroke();
     context.closePath();
     context.lineWidth = oldWidth;
@@ -100,12 +101,42 @@ async function redraw() {
     // detect landmarks
     const landmarks = await faceapi.detectFaceLandmarks(clippedImage);
 
+    // const faceline = [...landmarks.positions.slice(0, 16)];
+    // const tiltRadian = getTiltRoation(faceline[0], faceline[15]);
+    const leftEyeMost = landmarks.positions[36];
+    const rightEyeMost = landmarks.positions[45];
+    const tiltRadian = getTiltRoation(leftEyeMost, rightEyeMost);
+
+    // draw rotation corrected box
+    context.save();
+    context.beginPath();
+    context.translate(left + (oWidth / 2), top + (oHeight / 2));
+    context.rotate(tiltRadian);
+    context.translate(-(oWidth / 2), -(oHeight / 2));
+    context.rect(0, 0, oWidth, oHeight);
+    context.strokeStyle = "#ff0000";
+    context.lineWidth = lineWidth;
+    context.stroke();
+    context.closePath();
+    context.lineWidth = oldWidth;
+    context.restore();
+
     // draw
     // drawLandmarks(tempCanvas, landmarks);
     const outCanvas = createPuzzle(tempCanvas, landmarks);
     outCanvas.className = 'output';
     outputContainer.appendChild(outCanvas);
   }
+}
+
+function getTiltRoation(point1, point2) {
+  let x1 = point1.x;
+  let y1 = point1.y;
+  let x2 = point2.x;
+  let y2 = point2.y;
+  let _m = (y2 - y1) / (x2 - x1);
+  let rad = Math.atan(_m);
+  return rad;
 }
 
 function clipImage(image, outCanvas, x, y, width, height) {
