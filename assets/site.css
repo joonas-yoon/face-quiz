@@ -103,6 +103,9 @@ body:not([data-hide]) .icon-view-on {
   grid-column-gap: 5px;
   grid-row-gap: 5px;
 }
+.output-container[faces="1"] {
+  grid-template-columns: 1fr;
+}
 body[data-hide] .output-container {
   display: none !important;
 }

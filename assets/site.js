@@ -1,7 +1,6 @@
 let mainCanvas;
 let context;
 let currentImg;
-let faces;
 
 window.onload = async () => {
   console.log("window onload");
@@ -9,7 +8,7 @@ window.onload = async () => {
   const btnView = document.getElementById("btnView");
   const spinner = document.getElementById("spinner");
   const fileElement = document.getElementById("upload_file");
-  const outputContainer = document.getElementById("outputContainer");
+
   let isModelLoaded = false;
   addSpinner(spinner);
   setLoading(true);
@@ -24,9 +23,9 @@ window.onload = async () => {
     currentImg = await faceapi.bufferToImage(imgFile);
 
     const options = getFaceDetectorOptions();
-    faces = await faceapi.detectAllFaces(currentImg, options);
+    const faces = await faceapi.detectAllFaces(currentImg, options);
 
-    redraw();
+    redraw(faces);
     setLoading(false);
   });
 
@@ -72,7 +71,7 @@ function drawPoints(ctx, points, color) {
   }
 }
 
-async function redraw() {
+async function redraw(faces) {
   const background = document.getElementById("background");
 
   mainCanvas = faceapi.createCanvasFromMedia(currentImg);
@@ -85,6 +84,8 @@ async function redraw() {
   container.appendChild(mainCanvas);
   const outputContainer = document.getElementById("outputContainer");
   outputContainer.innerHTML = "";
+  console.log("faces", faces);
+  outputContainer.setAttribute("faces", (faces || []).length);
 
   const tempCanvas = document.createElement("canvas");
   // document.body.appendChild(tempCanvas);
