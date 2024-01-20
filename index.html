@@ -21,12 +21,19 @@
 
 <body>
   <div id="background" class="background"></div>
-  <div id="btnUpload" class="btn btn-upload">
-    <span class="material-symbols-outlined icon">
-      add_photo_alternate
-    </span>
-    <div id="spinner" class="spinner"></div>
-    <input type="file" name="file" id="upload_file" accept=".gif,.jpg,.jpeg,.png,.webp" />
+  <div class="btn-container">
+    <div id="btnUpload" class="btn btn-icon">
+      <span class="material-symbols-outlined icon">
+        add_photo_alternate
+      </span>
+      <div id="spinner" class="spinner"></div>
+      <input type="file" name="file" id="upload_file" accept=".gif,.jpg,.jpeg,.png,.webp" />
+    </div>
+    <div id="btnView" class="btn btn-icon">
+      <span class="material-symbols-outlined icon">
+        visibility
+      </span>
+    </div>
   </div>
   <div class="canvas-container">
     <div class="input-container" id="inputContainer">

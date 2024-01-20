@@ -42,14 +42,14 @@ body {
   width: 384px;
   height: 288px;
 }
-.btn-upload {
+.btn {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 92px;
   height: 92px;
-  margin: 2em auto;
+  margin: 0;
   padding: 5px;
   border: 1px solid #ffffff;
   border-radius: 5px;
@@ -58,18 +58,29 @@ body {
   cursor: pointer;
   color: #ffffff;
 }
-.btn-upload:not([data-loading]) .spinner,
-.btn-upload[data-loading] .icon {
+.btn-icon:not([data-loading]) .spinner,
+.btn-icon[data-loading] .icon {
   display: none;
 }
-.btn-upload:hover {
+.btn-icon:hover {
   color: #dfdfdf;
   border: 1px solid #dfdfdf;
   background-color: rgba(0, 0, 0, 0.5);
 }
-.btn-upload .icon {
+.btn-icon .icon {
   font-size: 4em;
   user-select: none;
+}
+.btn-container {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  column-gap: 12px;
+  margin: 2em auto;
+  width: 100%;
+  max-width: 512px;
+  justify-content: center;
+  align-items: center;
 }
 .input-container {
   position: relative;
