@@ -4,24 +4,19 @@ let currentImg;
 let faces;
 
 window.onload = async () => {
-  console.log('window onload');
-  const inputContainer = document.getElementById('inputContainer');
-  const spinner = document.getElementById('spinner');
-  const fileElement = document.getElementById('upload_file');
+  console.log("window onload");
+  const btnUpload = document.getElementById("btnUpload");
+  const spinner = document.getElementById("spinner");
+  const fileElement = document.getElementById("upload_file");
   let isModelLoaded = false;
   addSpinner(spinner);
+  setLoading(true);
   {
     await loadModel();
-    console.log('model loaded');
-    spinner.style.display = 'none';
-    isModelLoaded = true;
+    console.log("model loaded");
+    setLoading(false);
   }
-  fileElement.addEventListener('change', async (evt) => {
-    if (!isModelLoaded) {
-      window.alert('Model not loaded yet');
-      return;
-    }
-
+  fileElement.addEventListener("change", async (evt) => {
     const imgFile = evt.target.files[0];
     currentImg = await faceapi.bufferToImage(imgFile);
 
@@ -29,11 +24,22 @@ window.onload = async () => {
     faces = await faceapi.detectAllFaces(currentImg, options);
 
     redraw();
+    setLoading(false);
   });
-  inputContainer.addEventListener('click', (evt) => {
-    evt.preventDefault();
+  btnUpload.addEventListener("click", (evt) => {
+    setLoading(true);
     fileElement.click();
   });
+
+  function setLoading(enable) {
+    if (enable) {
+      isModelLoaded = false;
+      btnUpload.setAttribute("data-loading", true);
+    } else {
+      isModelLoaded = true;
+      btnUpload.removeAttribute("data-loading");
+    }
+  }
 };
 
 function drawCircle(ctx, x, y, color) {
@@ -47,29 +53,32 @@ function drawCircle(ctx, x, y, color) {
 
 function drawPoints(ctx, points, color) {
   console.log(points);
-  for (const {x, y} of points) {
+  for (const { x, y } of points) {
     drawCircle(ctx, x, y, color);
   }
 }
 
 async function redraw() {
-  mainCanvas = faceapi.createCanvasFromMedia(currentImg);
-  mainCanvas.className = 'uploaded';
-  context = mainCanvas.getContext('2d');
-  const container = document.getElementById('faceContainer');
-  console.log(mainCanvas);
-  container.innerHTML = '';
-  container.appendChild(mainCanvas);
-  const outputContainer = document.getElementById('outputContainer');
-  outputContainer.innerHTML = '';
+  const background = document.getElementById("background");
 
-  const tempCanvas = document.createElement('canvas');
+  mainCanvas = faceapi.createCanvasFromMedia(currentImg);
+  renderToBackground();
+
+  context = mainCanvas.getContext("2d");
+  const container = document.getElementById("faceContainer");
+  console.log(mainCanvas);
+  container.innerHTML = "";
+  container.appendChild(mainCanvas);
+  const outputContainer = document.getElementById("outputContainer");
+  outputContainer.innerHTML = "";
+
+  const tempCanvas = document.createElement("canvas");
   // document.body.appendChild(tempCanvas);
 
   for (const face of faces) {
     const cw = mainCanvas.width,
       ch = mainCanvas.height;
-    const {x, y, width, height} = face.relativeBox;
+    const { x, y, width, height } = face.relativeBox;
     const [left, top, oWidth, oHeight] = [
       x * cw,
       y * ch,
@@ -112,7 +121,7 @@ async function redraw() {
     // draw rotation corrected box
     context.save();
     context.beginPath();
-    context.translate(left + (oWidth / 2), top + (oHeight / 2));
+    context.translate(left + oWidth / 2, top + oHeight / 2);
     context.rotate(tiltRadian);
     context.translate(-(oWidth / 2), -(oHeight / 2));
     context.rect(0, 0, oWidth, oHeight);
@@ -140,7 +149,7 @@ async function redraw() {
       oWidth + 2 * pad,
       oHeight + 2 * pad,
     ];
-    
+
     const [dx, dy, dw, dh] = [-pad, -pad, tw + 2 * pad, th + 2 * pad];
     tctx.drawImage(currentImg, sx, sy, sw, sh, dx, dy, dw, dh);
     tctx.restore();
@@ -153,10 +162,16 @@ async function redraw() {
     // draw
     // drawLandmarks(tempCanvas, finalLandmarks);
     const outCanvas = createPuzzle(tempCanvas, finalLandmarks);
-    outCanvas.className = 'output';
+    outCanvas.className = "output";
     outputContainer.appendChild(outCanvas);
 
     delete tempCanvas;
+  }
+
+  renderToBackground();
+
+  function renderToBackground() {
+    background.style.backgroundImage = `url(${mainCanvas.toDataURL()})`;
   }
 }
 
@@ -173,7 +188,7 @@ function getTiltRoation(point1, point2) {
 function clipImage(image, outCanvas, x, y, width, height) {
   outCanvas.width = width;
   outCanvas.height = height;
-  const ctx = outCanvas.getContext('2d');
+  const ctx = outCanvas.getContext("2d");
   ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
   const img = new Image();
   img.src = outCanvas.toDataURL();
@@ -182,8 +197,8 @@ function clipImage(image, outCanvas, x, y, width, height) {
 
 function clipAndCopyImage(inputCanvas, outputCanvas, points, dx, dy, dw, dh) {
   const boundingBox = getBoundingBox(points);
-  console.log('bb', boundingBox);
-  const ctx = outputCanvas.getContext('2d');
+  console.log("bb", boundingBox);
+  const ctx = outputCanvas.getContext("2d");
   const image = new Image();
   image.src = inputCanvas.toDataURL();
   const padding = 5;
@@ -211,11 +226,9 @@ function clipAndCopyImage(inputCanvas, outputCanvas, points, dx, dy, dw, dh) {
 }
 
 function recalculateLineWidth(canvas) {
-  const {width, height} = canvas;
+  const { width, height } = canvas;
   const size = Math.min(width, height);
-  if (size < 480) return 2;
-  if (size < 1024) return 3;
-  return Math.ceil(Math.log10(size) * 2);
+  return size / 100;
 }
 
 function canvasToImage(canvas) {
@@ -225,7 +238,7 @@ function canvasToImage(canvas) {
 }
 
 function createPuzzle(inputCanvas, landmarks) {
-  const outputCanvas = document.createElement('canvas');
+  const outputCanvas = document.createElement("canvas");
   outputCanvas.width = 1920;
   outputCanvas.height = 1280;
   // left eye
@@ -278,13 +291,13 @@ function createPuzzle(inputCanvas, landmarks) {
 }
 
 function drawLandmarks(canvas, landmarks) {
-  const context = canvas.getContext('2d');
-  drawPoints(context, [...landmarks.positions.slice(17, 22)], '#0000ff88');
-  drawPoints(context, [...landmarks.positions.slice(22, 27)], '#00ff0088');
-  drawPoints(context, [...landmarks.positions.slice(36, 42)], '#ff000088');
-  drawPoints(context, [...landmarks.positions.slice(42, 48)], '#00ffff88');
-  drawPoints(context, [...landmarks.positions.slice(29, 36)], '#ff00ff88');
-  drawPoints(context, [...landmarks.positions.slice(48, 68)], '#ffff0088');
+  const context = canvas.getContext("2d");
+  drawPoints(context, [...landmarks.positions.slice(17, 22)], "#0000ff88");
+  drawPoints(context, [...landmarks.positions.slice(22, 27)], "#00ff0088");
+  drawPoints(context, [...landmarks.positions.slice(36, 42)], "#ff000088");
+  drawPoints(context, [...landmarks.positions.slice(42, 48)], "#00ffff88");
+  drawPoints(context, [...landmarks.positions.slice(29, 36)], "#ff00ff88");
+  drawPoints(context, [...landmarks.positions.slice(48, 68)], "#ffff0088");
 }
 
 function keepAspectBound(sx, sy, sw, sh, dw, dh) {
@@ -302,7 +315,7 @@ function getBoundingBox(points) {
     left = Infinity,
     right = -Infinity,
     bottom = -Infinity;
-  for ({_x, _y} of points) {
+  for ({ _x, _y } of points) {
     top = Math.min(top, _y);
     bottom = Math.max(bottom, _y);
     left = Math.min(left, _x);
@@ -320,13 +333,13 @@ function getBoundingBox(points) {
 
 async function loadModel() {
   const url =
-    'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/';
+    "https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/";
   await faceapi.loadFaceLandmarkModel(url);
   await faceapi.loadSsdMobilenetv1Model(url);
 }
 
-const SSD_MOBILENETV1 = 'ssd_mobilenetv1';
-const TINY_FACE_DETECTOR = 'tiny_face_detector';
+const SSD_MOBILENETV1 = "ssd_mobilenetv1";
+const TINY_FACE_DETECTOR = "tiny_face_detector";
 
 let selectedFaceDetector = SSD_MOBILENETV1;
 
@@ -339,6 +352,6 @@ let scoreThreshold = 0.5;
 
 function getFaceDetectorOptions() {
   return selectedFaceDetector === SSD_MOBILENETV1
-    ? new faceapi.SsdMobilenetv1Options({minConfidence})
-    : new faceapi.TinyFaceDetectorOptions({inputSize, scoreThreshold});
+    ? new faceapi.SsdMobilenetv1Options({ minConfidence })
+    : new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold });
 }

@@ -1,9 +1,38 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+html {
+  overflow-x: hidden;
+}
+body {
+  background-color: #212121;
+}
+.background {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -2;
+  background-color: #212121;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center center;
+  filter: blur(5px);
+}
 .canvas-container {
   position: relative;
   display: flex;
   width: fit-content;
   padding: 0;
-  margin: 5em auto;
+  margin: 0 auto;
   flex-direction: row;
   column-gap: 1em;
   align-items: center;
@@ -13,27 +42,42 @@
   width: 384px;
   height: 288px;
 }
+.btn-upload {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 92px;
+  height: 92px;
+  margin: 2em auto;
+  padding: 5px;
+  border: 1px solid #ffffff;
+  border-radius: 5px;
+  box-sizing: border-box;
+  background-color: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  color: #ffffff;
+}
+.btn-upload:not([data-loading]) .spinner,
+.btn-upload[data-loading] .icon {
+  display: none;
+}
+.btn-upload:hover {
+  color: #dfdfdf;
+  border: 1px solid #dfdfdf;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.btn-upload .icon {
+  font-size: 4em;
+  user-select: none;
+}
 .input-container {
   position: relative;
   border: 1px solid rgb(41, 60, 233);
   width: 420px;
   height: 420px;
   cursor: pointer;
-}
-.input-container .help-text {
   display: none;
-}
-.input-container:hover .uploaded {
-  opacity: 0.5;
-}
-.input-container:hover .help-text {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  vertical-align: middle;
-  background-color: rgba(0, 0, 0, 0.1);
-  justify-content: center;
-  align-items: center;
 }
 .output-container {
   display: grid;
@@ -41,24 +85,15 @@
   grid-column-gap: 0;
   grid-row-gap: 0;
 }
-#faceContainer .uploaded {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
 #upload_file {
   display: none;
 }
 .spinner {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   display: flex;
   justify-items: center;
   align-items: center;
-  background-color: #3f3f3f;
 }
 @media screen and (max-width: 768px) {
   .canvas-container {
