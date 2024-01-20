@@ -6,8 +6,10 @@ let faces;
 window.onload = async () => {
   console.log("window onload");
   const btnUpload = document.getElementById("btnUpload");
+  const btnView = document.getElementById("btnView");
   const spinner = document.getElementById("spinner");
   const fileElement = document.getElementById("upload_file");
+  const outputContainer = document.getElementById("outputContainer");
   let isModelLoaded = false;
   addSpinner(spinner);
   setLoading(true);
@@ -16,6 +18,7 @@ window.onload = async () => {
     console.log("model loaded");
     setLoading(false);
   }
+
   fileElement.addEventListener("change", async (evt) => {
     const imgFile = evt.target.files[0];
     currentImg = await faceapi.bufferToImage(imgFile);
@@ -26,9 +29,20 @@ window.onload = async () => {
     redraw();
     setLoading(false);
   });
+
   btnUpload.addEventListener("click", (evt) => {
     setLoading(true);
     fileElement.click();
+  });
+
+  btnView.addEventListener("click", (evt) => {
+    const body = document.body;
+    const attr = "data-hide";
+    if (body.hasAttribute(attr)) {
+      body.removeAttribute(attr);
+    } else {
+      body.setAttribute(attr, true);
+    }
   });
 
   function setLoading(enable) {
