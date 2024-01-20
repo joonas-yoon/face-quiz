@@ -64,7 +64,7 @@ async function redraw() {
   outputContainer.innerHTML = '';
 
   const tempCanvas = document.createElement('canvas');
-  document.body.appendChild(tempCanvas);
+  // document.body.appendChild(tempCanvas);
 
   for (const face of faces) {
     const cw = mainCanvas.width,
@@ -80,6 +80,7 @@ async function redraw() {
     // draw box
     const oldWidth = context.lineWidth;
     const lineWidth = recalculateLineWidth(mainCanvas);
+    /*
     context.beginPath();
     context.rect(left, top, oWidth, oHeight);
     context.strokeStyle = '#0000ff';
@@ -87,6 +88,7 @@ async function redraw() {
     context.stroke();
     context.closePath();
     context.lineWidth = oldWidth;
+    */
 
     // clip image by box
     const clippedImage = clipImage(
@@ -121,11 +123,40 @@ async function redraw() {
     context.lineWidth = oldWidth;
     context.restore();
 
+    // rotate image on temp canvas
+    const tctx = tempCanvas.getContext("2d");
+    // drawPoints(tctx, [...landmarks.positions.slice(0, 16)], "#f0f000aa");
+    // drawPoints(tctx, [landmarks.positions[16]], "#f03000aa");
+    const [tw, th] = [tempCanvas.width, tempCanvas.height];
+    tctx.clearRect(0, 0, tw, th);
+    tctx.save();
+    tctx.translate(tw / 2, th / 2);
+    tctx.rotate(-tiltRadian);
+    tctx.translate(-tw / 2, -th / 2);
+    const pad = Math.ceil(Math.max(tw, th) * 0.2);
+    const [sx, sy, sw, sh] = [
+      left - pad,
+      top - pad,
+      oWidth + 2 * pad,
+      oHeight + 2 * pad,
+    ];
+    
+    const [dx, dy, dw, dh] = [-pad, -pad, tw + 2 * pad, th + 2 * pad];
+    tctx.drawImage(currentImg, sx, sy, sw, sh, dx, dy, dw, dh);
+    tctx.restore();
+
+    // find landmark again from rotated and clipped picture
+    const rotatedImage = new Image();
+    rotatedImage.src = tempCanvas.toDataURL();
+    const finalLandmarks = await faceapi.detectFaceLandmarks(rotatedImage);
+
     // draw
-    // drawLandmarks(tempCanvas, landmarks);
-    const outCanvas = createPuzzle(tempCanvas, landmarks);
+    // drawLandmarks(tempCanvas, finalLandmarks);
+    const outCanvas = createPuzzle(tempCanvas, finalLandmarks);
     outCanvas.className = 'output';
     outputContainer.appendChild(outCanvas);
+
+    delete tempCanvas;
   }
 }
 
